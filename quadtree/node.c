@@ -35,7 +35,7 @@ void makeChildren( Node *parent )
     // child edge length
     double hChild = pow(2.0,-(level+1));
 
-    if (level == 10)
+    if (level == 9)
         {
         printf("Error: Program terminated because maximum level of tree exceeded\n");
         exit (0);

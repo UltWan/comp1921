@@ -46,10 +46,6 @@ double dataFunction( double x, double y, int choice )
 
 bool indicator( Node *node, double tolerance, int choice )
 {
-
-    tolerance = 0.5;
-    choice = 0;
-
     double v[4],vmin,vmax;
     double h = pow(2,-node->level);
 

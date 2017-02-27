@@ -18,6 +18,14 @@ int main( int argc, char **argv )
     // split one node to level 2
     makeChildren( head->child[2] );
 
+    // search leafs via indicator
+    int i;
+
+    for(i; i<=9; i++)
+       {
+       searchTree(head);
+       }
+
     // write entire tree to quad.out
     writeTree( head );
 
