@@ -1,3 +1,6 @@
+// COMP 1921 Code Review
+// Ryan Wan, Monday 27th February 2017
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <math.h>
@@ -23,7 +26,6 @@ void printOut( FILE *fp, Node *node )
     return;
 }
 
-
 // recursively search for leaf nodes
 void writeNode ( FILE *fp, Node *node )
     {
@@ -40,7 +42,6 @@ void writeNode ( FILE *fp, Node *node )
     return;
     }
 
-
 // open a file and prepare to write
 void writeTree( Node *head )
     {
@@ -49,4 +50,3 @@ void writeTree( Node *head )
     fclose(fp);
     return;
     }
-

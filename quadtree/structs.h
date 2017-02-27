@@ -1,3 +1,7 @@
+// COMP 1921 Code Review
+// Ryan Wan, Monday 27th February 2017
+
+
 // data structure definition
 struct qnode
     {
@@ -5,15 +9,7 @@ struct qnode
     int level;
     double xy[2];
     struct qnode *child[4];
-    struct node *nextLeaf;
     };
 
 // data type definition
 typedef struct qnode Node;
-
-struct quadtreeGrid
-    {
-    Node *leafHead;
-    Node *nextLeaf;
-    int maxLevel;
-    } Quadtree;

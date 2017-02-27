@@ -4,7 +4,7 @@
 EXE_DIR = .
 EXE = $(EXE_DIR)/quadtree
 
-SRC= main.c node.c output.c
+SRC= main.c node.c output.c valueTree.c
 
 # generic build details
 
@@ -39,3 +39,4 @@ cleaner:
 main.o:  main.c functions.h
 node.o: node.c structs.h
 output.o:  output.c structs.h
+valueTree.o: valueTree.c structs.h
