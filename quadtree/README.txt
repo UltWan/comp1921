@@ -1,5 +1,5 @@
-// COMP 1711 Assignment 6
-// Ryan Wan, Thursday 8th December 2016
+// COMP 1921 Code Review
+// Ryan Wan, Monday 28th February 2017
 
 Quadtree Readme File
 
@@ -29,3 +29,5 @@ If the program runs successfully it will produce a quad.out file needed for Gnup
 
 -Display the quadtree through Gnuplot by typing:
 	load 'quad.gnu'
+
+A plotted graph should appear on Gnuplot.
