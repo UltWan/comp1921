@@ -7,22 +7,12 @@ typedef struct _sdl_init
 }
   init;
 
-SDL_Rect* addCars(int carNum);
-
-void roadCrossing(SDL_Rect *car, int carNum, int speed);
-
-bool crash(SDL_Rect *player, SDL_Rect *car, int carNum);
-
-void cleanup(char *type, ...);
-
 init* SDL_Setup(char *name, int posX, int posY, int resX, int resY);
 
-bool contains(SDL_Rect *bound, SDL_Rect *obj);
+void renderColour(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, SDL_Rect *block, int blockNum);
 
-void renderHard(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, SDL_Rect *car, SDL_Rect *car2, int carNum);
-
-bool box2box(SDL_Rect *box1, SDL_Rect *box2);
-
-SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, SDL_Color color);
+SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, SDL_Color colour);
 
 void renderTexture(SDL_Renderer *ren, SDL_Texture *tex, int x, int y, SDL_Rect *clip);
+
+void cleanup(char *type, ...);

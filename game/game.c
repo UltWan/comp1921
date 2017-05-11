@@ -5,6 +5,8 @@
 #include <SDL2/SDL_ttf.h>
 #include "game.h"
 
+// checks setup for errors
+
 init* SDL_Setup(char *name, int popupX, int popupY, int windowX, int windowY)
 {
   if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
@@ -38,7 +40,9 @@ init* SDL_Setup(char *name, int popupX, int popupY, int windowX, int windowY)
   return temp;
 }
 
-void renderHard(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, SDL_Rect *car, SDL_Rect *car2, int carNum)
+// render colours for objects
+
+void renderColour(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, SDL_Rect *block, int blockNum)
 {
   SDL_RenderClear(ren);
   SDL_SetRenderDrawColor(ren, 0xff, 0xff, 0xff, 0xff);
@@ -47,17 +51,9 @@ void renderHard(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, S
   SDL_RenderFillRect(ren, user);
   SDL_SetRenderDrawColor(ren, 0, 0, 0xff, 0xff);
 
-  for (int i = 0; i < carNum; i++)
+  for (int i = 0; i < blockNum; i++)
   {
-    SDL_RenderFillRect(ren, car + i);
-  }
-
-  if (car2 != NULL)
-  {
-    for (int i = 0; i < carNum; i++)
-    {
-      SDL_RenderFillRect(ren, car2 + i);
-    }
+    SDL_RenderFillRect(ren, block + i);
   }
 
   SDL_SetRenderDrawColor(ren, 0, 0, 0, 0xff);
@@ -66,7 +62,9 @@ void renderHard(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, S
   SDL_RenderPresent(ren);
 }
 
-SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, SDL_Color color)
+// checks errors with TTF
+
+SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, SDL_Color colour)
 {
   TTF_Font *ttf = TTF_OpenFont(f_type, f_size);
   if (ttf == NULL)
@@ -74,7 +72,7 @@ SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, 
     fprintf(stderr, "TTF_OpenFont: %s\n", SDL_GetError());
     return NULL;
   }
-  SDL_Surface *temp = TTF_RenderText_Blended(ttf, message, color);
+  SDL_Surface *temp = TTF_RenderText_Blended(ttf, message, colour);
   if (temp == NULL)
   {
       fprintf(stderr, "TTF_RenderText_Blended: %s\n", SDL_GetError());
@@ -94,85 +92,26 @@ SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, 
   return texture;
 }
 
+// c
+
 void renderTexture(SDL_Renderer *ren, SDL_Texture *tex, int x, int y, SDL_Rect *clip)
 {
   SDL_Rect dest;
   dest.x = x;
   dest.y = y;
-  if (clip != NULL)
+  if (clip != 0)
   {
     dest.h = clip->h;
     dest.w = clip->w;
   }
   else
   {
-    SDL_QueryTexture(tex, NULL, NULL, &dest.w, &dest.h);
+    SDL_QueryTexture(tex, 0, 0, &dest.w, &dest.h);
   }
   SDL_RenderCopy(ren, tex, clip, &dest);
 }
 
-bool contains(SDL_Rect *bound, SDL_Rect *obj)
-{
-    int objTop		= obj->y;
-    int objBottom	= obj->y + obj->h;
-    int objLeft		= obj->x;
-    int objRight	= obj->x + obj->w;
-
-    int boundTop	= bound->y;
-    int boundBottom	= bound->y + bound->h;
-    int boundLeft	= bound->x;
-    int boundRight	= bound->x + bound->w;
-
-    if (objLeft < boundLeft || objTop < boundTop ||
-        objRight > boundRight || objBottom > boundBottom)
-    {
-      return true;
-  }
-  return false;
-}
-
-bool box2box(SDL_Rect *box1, SDL_Rect *box2)
-{
-  int b1Top    = box1->y;
-  int b1Bottom = box1->y + box1->h;
-  int b1Left   = box1->x;
-  int b1Right  = box1->x + box1->w;
-
-  int b2Top    = box2->y;
-  int b2Bottom = box2->y + box2->h;
-  int b2Left   = box2->x;
-  int b2Right  = box2->x + box2->w;
-
-  if (b1Left >= b2Right)
-  {
-    return false;
-  }
-  if (b1Right <= b2Left)
-  {
-    return false;
-  }
-  if (b1Top >= b2Bottom)
-  {
-    return false;
-  }
-  if (b1Bottom <= b2Top)
-  {
-    return false;
-  }
-return true;
-}
-
-bool crash(SDL_Rect *player, SDL_Rect *car, int carNum)
-{
-  for (int i = 0; i < carNum; i++)
-  {
-    if (box2box(car + i, player))
-    {
-      return true;
-    }
-  }
-  return false;
-}
+// cleanup when exiting c
 
 void cleanup(char *type, ...)
 {
@@ -196,45 +135,4 @@ void cleanup(char *type, ...)
       type++;
   }
   va_end(objects);
-}
-
-SDL_Rect* addCars(int carNum)
-{
-  SDL_Rect *temp = (SDL_Rect*)malloc(carNum * sizeof(SDL_Rect));
-
-  for (int i = 0; i < carNum; i++)
-  {
-      temp[i].x = 60 + i*20;
-      temp[i].y = rand() % 440;
-      temp[i].w = 20;
-      temp[i].h = 20;
-  }
-
-  printf("Number of cars created = %d\n", carNum);
-  return temp;
-}
-
-void roadCrossing(SDL_Rect *car, int carNum, int speed)
-{
-  for (int i = 0; i < carNum; i++)
-  {
-    if (i % 2 == 0)
-    {
-      car[i].y += (i + 1) % 3 * speed;
-
-      if (car[i].y + car[i].h > 460)
-      {
-        car[i].y = 20;
-      }
-    }
-    else
-    {
-      car[i].y -= (i + 1) % 3 * speed;
-
-      if (car[i].y <= 20)
-      {
-        car[i].y = 460 - car[i].h;
-      }
-    }
-  }
 }

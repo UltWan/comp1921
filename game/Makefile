@@ -3,7 +3,7 @@
 EXE_DIR = .
 EXE = $(EXE_DIR)/game
 
-SRC= main.c game.c
+SRC= main.c game.c obstacles.c
 
 # generic build details
 
@@ -30,6 +30,7 @@ clean:
 
 # dependencies
 
-main.o:  main.c game.h
+main.o:  main.c game.h obstacles.h
 game.o:  game.c game.h
+obstacles.o: obstacles.c obstacles.h
 
