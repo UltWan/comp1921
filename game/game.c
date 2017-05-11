@@ -1,157 +1,235 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdbool.h>
-#include <time.h>
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_ttf.h>
+#include "game.h"
 
-#include "gameData.h"
-#include "gameFunctions.h"
-#include "controlFunctions.h"
-
-// initialise the game data
-
-void init(void)
+init* SDL_Setup(char *name, int popupX, int popupY, int windowX, int windowY)
 {
-    SDL_Window *window = NULL;
-    if (SDL_Init(SDL_INIT_VIDEO) != 0) 
-        fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
-    
-    atexit(SDL_Quit); // set for clean-up on exit
+  if (SDL_Init(SDL_INIT_EVERYTHING) != 0)
+  {
+    fprintf(stderr, "SDL_Init: %s\n", SDL_GetError());
+    return NULL;
+  }
 
-    SDL_CreateWindowAndRenderer(800, 480, 0, &window, &renderer);
-    SDL_SetWindowTitle( window, "Circles eat squares");
-    SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
-    SDL_RenderClear(renderer);
-    SDL_RenderPresent(renderer);
+  SDL_Window *window = SDL_CreateWindow(name, popupX, popupY, windowX, windowY, SDL_WINDOW_SHOWN);
+  if (window == NULL)
+  {
+    fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError());
+    SDL_Quit();
+    return NULL;
+  }
 
-    square_surface = SDL_LoadBMP("images/square.bmp");
-    sprite_surface = SDL_LoadBMP("images/sprite.bmp");
-    background_surface = SDL_LoadBMP("images/background.bmp");
+    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  if (renderer == NULL)
+  {
+    fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
+    cleanup("w", window);
+    SDL_Quit();
+    return NULL;
+  }
 
-    square_texture = SDL_CreateTextureFromSurface(renderer, square_surface);
-    sprite_texture = SDL_CreateTextureFromSurface(renderer, sprite_surface);
-    background_texture = SDL_CreateTextureFromSurface(renderer, background_surface);
-
-    square.x = 5;
-    square.y = 5;
-
-    sprite = square;
-    oldsprite = sprite;
-
-    dir = RIGHT;
-    
-    next_square();
-    eaten = true;
-    number = 0;
-
-    return;
+  init *temp = (init*)malloc(sizeof(init));
+  temp->window = window;
+  temp->renderer = renderer;
+  return temp;
 }
 
-// read keyboard input
-
-void input(void)
+void renderHard(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, SDL_Rect *car, SDL_Rect *car2, int carNum)
 {
-    const Uint8 *state = SDL_GetKeyboardState(NULL);
-
-    SDL_PumpEvents();
-
-    if (state[SDL_SCANCODE_UP]) {
-        dir = UP;
-    } 
-    else if (state[SDL_SCANCODE_DOWN]) {
-        dir = DOWN;
-    } 
-    else if (state[SDL_SCANCODE_LEFT]) {
-        dir = LEFT;
-    } 
-    else if (state[SDL_SCANCODE_RIGHT]) {
-        dir = RIGHT;
-    } 
-    else if (state[SDL_SCANCODE_ESCAPE]) {
-        exit(0);
+  SDL_RenderClear(ren);
+  SDL_SetRenderDrawColor(ren, 0xff, 0xff, 0xff, 0xff);
+  SDL_RenderFillRect(ren, map);
+  SDL_SetRenderDrawColor(ren, 0xff, 0, 0, 0xff);
+  SDL_RenderFillRect(ren, user);
+  SDL_SetRenderDrawColor(ren, 0, 0, 0xff, 0xff);
+  for (int i = 0; i < carNum; i++)
+  {
+    SDL_RenderFillRect(ren, car + i);
+  }
+  if (car2 != NULL)
+  {
+    for (int i = 0; i < carNum; i++)
+    {
+      SDL_RenderFillRect(ren, car2 + i);
     }
-    return;
+  }
+  SDL_SetRenderDrawColor(ren, 0, 0, 0, 0xff);
+  SDL_RenderFillRect(ren, g);
+  SDL_SetRenderDrawColor(ren, 0x99, 0, 0, 0xff);
+  SDL_RenderPresent(ren);
 }
 
-// update player position
-
-bool update(void)
+SDL_Texture* renderText(SDL_Renderer *ren, string message, string f_type, int f_size, SDL_Color color)
 {
-    oldsprite = sprite;
+  TTF_Font *ttf = TTF_OpenFont(f_type, f_size);
+  if (ttf == NULL)
+  {
+    fprintf(stderr, "TTF_OpenFont: %s\n", SDL_GetError());
+    return NULL;
+  }
+  SDL_Surface *temp = TTF_RenderText_Blended(ttf, message, color);
+  if (temp == NULL)
+  {
+      fprintf(stderr, "TTF_RenderText_Blended: %s\n", SDL_GetError());
+      TTF_CloseFont(ttf);
+      return NULL;
+  }
+  SDL_Texture *texture = SDL_CreateTextureFromSurface(ren, temp);
+  if (texture == NULL)
+  {
+    fprintf(stderr, "SDL_CreateTextureFromSurface: %s\n", SDL_GetError());
+    TTF_CloseFont(ttf);
+    SDL_FreeSurface(temp);
+    return NULL;
+  }
+  TTF_CloseFont(ttf);
+  SDL_FreeSurface(temp);
+  return texture;
+}
 
-    switch (dir) {
-        case UP:
-            sprite.y = sprite.y - 1;
-            break;
-        case DOWN:
-            sprite.y = sprite.y + 1;
-            break;
-        case LEFT:
-            sprite.x = sprite.x - 1;
-            break;
-        case RIGHT:
-            sprite.x = sprite.x + 1;
-            break;
+void renderTexture(SDL_Renderer *ren, SDL_Texture *tex, int x, int y, SDL_Rect *clip)
+{
+  SDL_Rect dest;
+  dest.x = x;
+  dest.y = y;
+  if (clip != NULL)
+  {
+    dest.h = clip->h;
+    dest.w = clip->w;
+  }
+  else
+  {
+    SDL_QueryTexture(tex, NULL, NULL, &dest.w, &dest.h);
+  }
+  SDL_RenderCopy(ren, tex, clip, &dest);
+}
+
+bool contains(SDL_Rect *bound, SDL_Rect *obj)
+{
+    int objTop		= obj->y;
+    int objBottom	= obj->y + obj->h;
+    int objLeft		= obj->x;
+    int objRight	= obj->x + obj->w;
+
+    int boundTop	= bound->y;
+    int boundBottom	= bound->y + bound->h;
+    int boundLeft	= bound->x;
+    int boundRight	= bound->x + bound->w;
+
+    if (objLeft < boundLeft || objTop < boundTop ||
+        objRight > boundRight || objBottom > boundBottom)
+    {
+      return true;
+  }
+  return false;
+}
+
+bool crash(SDL_Rect *box1, SDL_Rect *box2)
+{
+  int b1Top    = box1->y;
+  int b1Bottom = box1->y + box1->h;
+  int b1Left   = box1->x;
+  int b1Right  = box1->x + box1->w;
+
+  int b2Top    = box2->y;
+  int b2Bottom = box2->y + box2->h;
+  int b2Left   = box2->x;
+  int b2Right  = box2->x + box2->w;
+
+  if (b1Left >= b2Right)
+  {
+    return false;
+  }
+  if (b1Right <= b2Left)
+  {
+    return false;
+  }
+  if (b1Top >= b2Bottom)
+  {
+    return false;
+  }
+  if (b1Bottom <= b2Top)
+  {
+    return false;
+  }
+return true;
+}
+
+bool Crash(SDL_Rect *player, SDL_Rect *car, int carNum)
+{
+  for (int i = 0; i < carNum; i++)
+  {
+    if (crash(car + i, player))
+    {
+      return true;
     }
+  }
+  return false;
+}
 
-    if (sprite.x < 0 || sprite.x > MAX_X || sprite.y < 0 || sprite.y > MAX_Y) {
-        return false; // lose
+void cleanup(char *type, ...)
+{
+  va_list objects;
+  va_start(objects, type);
+
+  while (*type != '\0')
+  {
+    if (*type == 't')
+    {
+      SDL_DestroyTexture(va_arg(objects, SDL_Texture *));
     }
-
-    if (sprite.x == square.x && sprite.y == square.y) {
-        next_square();
-        number++;
-        eaten = true;  // eat square
-    } else {
-        eaten = false; // continue
+    else if (*type == 'r')
+    {
+      SDL_DestroyRenderer(va_arg(objects, SDL_Renderer *));
     }
-
-    return true;
+    else if (*type == 'w')
+    {
+      SDL_DestroyWindow(va_arg(objects, SDL_Window *));
+    }
+      type++;
+  }
+  va_end(objects);
 }
 
-// generate new square location
-
-void next_square(void)
+SDL_Rect* addCars(int carNum)
 {
-    square.x = (square.x * 6 + 1) % (MAX_X + 1);
-    square.y = (square.y * 16 + 1) % (MAX_Y + 1);
+  SDL_Rect *temp = (SDL_Rect*)malloc(carNum * sizeof(SDL_Rect));
+
+  for (int i = 0; i < carNum; i++)
+  {
+      temp[i].x = 60 + i*20;
+      temp[i].y = rand() % 440;
+      temp[i].w = 20;
+      temp[i].h = 20;
+  }
+
+  printf("Number of cars created = %d\n", carNum);
+  return temp;
 }
 
-// end of game
-
-void gameover(void)
+void roadCrossing(SDL_Rect *car, int carNum, int speed)
 {
-    printf("Score: %d\n", number);
-    printf("Game Over\n");
-    exit(0);
+  for (int i = 0; i < carNum; i++)
+  {
+    if (i % 2 == 0)
+    {
+      car[i].y += (i + 1) % 3 * speed;
+
+      if (car[i].y + car[i].h > 460)
+      {
+        car[i].y = 20;
+      }
+    }
+    else
+    {
+      car[i].y -= (i + 1) % 3 * speed;
+
+      if (car[i].y <= 20)
+      {
+        car[i].y = 460 - car[i].h;
+      }
+    }
+  }
 }
-
-// render current game state
-
-void render(void)
-{
-    if (eaten) 
-        draw_object(square,square_texture); // draw new square if required
-     
-    draw_object(oldsprite,background_texture);   // redraw old location
-    draw_object(sprite,sprite_texture);     // draw new location
-
-    SDL_RenderPresent(renderer);
-
-    return;
-}
-
-// draw game components
-
-void draw_object( node object, SDL_Texture *texture ) 
-{
-    SDL_Rect rect;
-    rect.h = TILE_SIZE;
-    rect.w = TILE_SIZE;
-    rect.x = object.x * TILE_SIZE;
-    rect.y = object.y * TILE_SIZE;
-    SDL_RenderCopy(renderer, texture, NULL, &rect);
-
-    return;
-}
-

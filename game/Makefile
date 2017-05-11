@@ -1,4 +1,3 @@
-
 # code details
 
 EXE_DIR = .
@@ -10,7 +9,7 @@ SRC= main.c game.c
 
 CC =     gcc
 CFLAGS = -Wall -O
-LIBS =   -lSDL2 -lSDL2_image
+LIBS =   -lSDL2 -lSDL2_image -lSDL2_ttf
 
 # compile to  object code
 
@@ -31,6 +30,6 @@ clean:
 
 # dependencies
 
-main.o:  main.c controlFunctions.h
-eatSquare.o:  game.c gameFunctions.h gameData.h
+main.o:  main.c game.h
+game.o:  game.c game.h
 
