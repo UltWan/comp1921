@@ -14,6 +14,7 @@ init* SDL_Setup(char *name, int popupX, int popupY, int windowX, int windowY)
   }
 
   SDL_Window *window = SDL_CreateWindow(name, popupX, popupY, windowX, windowY, SDL_WINDOW_SHOWN);
+
   if (window == NULL)
   {
     fprintf(stderr, "SDL_CreateWindow: %s\n", SDL_GetError());
@@ -21,7 +22,8 @@ init* SDL_Setup(char *name, int popupX, int popupY, int windowX, int windowY)
     return NULL;
   }
 
-    SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+  SDL_Renderer *renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+
   if (renderer == NULL)
   {
     fprintf(stderr, "SDL_CreateRenderer: %s\n", SDL_GetError());
@@ -44,10 +46,12 @@ void renderHard(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, S
   SDL_SetRenderDrawColor(ren, 0xff, 0, 0, 0xff);
   SDL_RenderFillRect(ren, user);
   SDL_SetRenderDrawColor(ren, 0, 0, 0xff, 0xff);
+
   for (int i = 0; i < carNum; i++)
   {
     SDL_RenderFillRect(ren, car + i);
   }
+
   if (car2 != NULL)
   {
     for (int i = 0; i < carNum; i++)
@@ -55,13 +59,14 @@ void renderHard(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g, S
       SDL_RenderFillRect(ren, car2 + i);
     }
   }
+
   SDL_SetRenderDrawColor(ren, 0, 0, 0, 0xff);
   SDL_RenderFillRect(ren, g);
   SDL_SetRenderDrawColor(ren, 0x99, 0, 0, 0xff);
   SDL_RenderPresent(ren);
 }
 
-SDL_Texture* renderText(SDL_Renderer *ren, string message, string f_type, int f_size, SDL_Color color)
+SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, SDL_Color color)
 {
   TTF_Font *ttf = TTF_OpenFont(f_type, f_size);
   if (ttf == NULL)
@@ -126,7 +131,7 @@ bool contains(SDL_Rect *bound, SDL_Rect *obj)
   return false;
 }
 
-bool crash(SDL_Rect *box1, SDL_Rect *box2)
+bool box2box(SDL_Rect *box1, SDL_Rect *box2)
 {
   int b1Top    = box1->y;
   int b1Bottom = box1->y + box1->h;
@@ -157,11 +162,11 @@ bool crash(SDL_Rect *box1, SDL_Rect *box2)
 return true;
 }
 
-bool Crash(SDL_Rect *player, SDL_Rect *car, int carNum)
+bool crash(SDL_Rect *player, SDL_Rect *car, int carNum)
 {
   for (int i = 0; i < carNum; i++)
   {
-    if (crash(car + i, player))
+    if (box2box(car + i, player))
     {
       return true;
     }

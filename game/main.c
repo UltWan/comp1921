@@ -7,14 +7,14 @@
 
 int main(int argc, char *argv[])
 {
-  int popup_x = 250, popup_y = 250, window_x = 700, window_y = 500, scale = 1;
+  int popup_x = 250, popup_y = 250, window_x = 700, window_y = 500;
 
   init *game = SDL_Setup("Cross the Road", popup_x, popup_y, window_x, window_y);
 
   if (TTF_Init() != 0)
   {
     fprintf(stderr, "TTF_Init: %s\n", SDL_GetError());
-    cleanup("rw", game->renderer, game->window);
+    cleanup("g", game->renderer, game->window);
     free(game);
     SDL_Quit();
     return 1;
@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
         {
           case SDLK_ESCAPE:
           escape = true;
-          printf("Game closed\n");
+          printf("Escape pressed: Game closed\n");
              break;
           case SDLK_UP:
               user.y -= user.h;
@@ -91,19 +91,19 @@ int main(int argc, char *argv[])
       SDL_SetRenderDrawColor(game->renderer, 0xff, 0xff, 0xff, 0xff);
       SDL_RenderFillRect(game->renderer, &winning);
 
-      string f_type = "fonts/Gobold Blocky Italic.otf";
+      str f_type = "fonts/Gobold Blocky Italic.otf";
       SDL_Color color = {25, 25, 25, 25};
       SDL_Texture *message = renderText(game->renderer, "Victory!", f_type, 100, color);
       if (message == NULL)
       {
-        cleanup("rw", game->renderer, game->window);
+        cleanup("g", game->renderer, game->window);
         free(traffic);
         free(game);
         TTF_Quit();
         SDL_Quit();
              
         fprintf(stderr, "renderText: %s\n", SDL_GetError());
-        return -2;
+        return 1;
       }
       int message_h, message_w;
       SDL_QueryTexture(message, NULL, NULL, &message_w, &message_h);
@@ -120,15 +120,17 @@ int main(int argc, char *argv[])
       {
         int counter = 0;
         roadCrossing(traffic, carNum, 1);
-        if (contains(&map, &user) || Crash(&user, traffic, carNum))
+
+        if (contains(&map, &user) || crash(&user, traffic, carNum))
         {
           printf("Crashed\n");
-          counter ++;
-          if (crash(&end, &user))
+          counter++;
+
+          if (box2box(&end, &user))
           {
             win = true;
-            printf("Victory!\nLives used = ");
-            printf("%d\n", counter);
+            printf("Victory!");
+            //printf("%d\n", counter);
           }
           user.x = map.x;
           user.y = window_y / 2 - user.h / 2;
@@ -137,10 +139,10 @@ int main(int argc, char *argv[])
         SDL_Delay(2);
       }
     }
-  cleanup("rw", game->renderer, game->window);
-  free(traffic);
-  free(game);
-  SDL_Quit();
+    cleanup("g", game->renderer, game->window);
+    free(traffic);
+    free(game);
+    SDL_Quit();
 
-  return 0;
+    return 0;
 }
