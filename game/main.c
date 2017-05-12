@@ -117,14 +117,14 @@ int main(int argc, char *argv[])
       int x = window_x / 2 - message_w / 2;
       int y = window_y / 2 - message_h / 2;
 
-      renderTexture(game->renderer, message, x, y, 0);
+      renderMess(game->renderer, message, x, y, 0);
 
       SDL_RenderPresent(game->renderer);
     }
 
     else
     {
-      // controls the types of collisions
+      // recognises the types of collisions
       roadCrossing(traffic, blockNum, 1);
 
       if (box2box(&end, &user))
@@ -132,14 +132,14 @@ int main(int argc, char *argv[])
         win = true;
         printf("Victory!\n");
       }
-      else if (contains(&map, &user))
+      else if (has(&map, &user))
       {
         printf("Crashed into an edge\n");
 
         user.x = map.x;
         user.y = window_y / 2 - user.h / 2;
       }
-      else if (contains(&map, &user) || crash(&user, traffic, blockNum))
+      else if (has(&map, &user) || crash(&user, traffic, blockNum))
       {
         printf("Crashed into an obstacle\n");
 

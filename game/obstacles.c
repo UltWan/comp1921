@@ -2,10 +2,11 @@
 #include <stdlib.h>
 #include <stdbool.h>
 #include <SDL2/SDL.h>
-#include <SDL2/SDL_ttf.h>
 #include "obstacles.h"
 
-bool contains(SDL_Rect *subj, SDL_Rect *obj)
+// checks if there are two variables
+
+bool has(SDL_Rect *subj, SDL_Rect *obj)
 {
     int subjTop	        = subj->y;
     int subjBottom	= subj->y + subj->h;
@@ -25,40 +26,40 @@ bool contains(SDL_Rect *subj, SDL_Rect *obj)
   return false;
 }
 
-// player to box interaction
+// interaction between two boxes
 
-bool box2box(SDL_Rect *box1, SDL_Rect *box2)
+bool box2box(SDL_Rect *boxA, SDL_Rect *boxB)
 {
-  int box1Top    = box1->y;
-  int box1Bottom = box1->y + box1->h;
-  int box1Left   = box1->x;
-  int box1Right  = box1->x + box1->w;
+  int boxATop    = boxA->y;
+  int boxABottom = boxA->y + boxA->h;
+  int boxALeft   = boxA->x;
+  int boxARight  = boxA->x + boxA->w;
 
-  int box2Top    = box2->y;
-  int box2Bottom = box2->y + box2->h;
-  int box2Left   = box2->x;
-  int box2Right  = box2->x + box2->w;
+  int boxBTop    = boxB->y;
+  int boxBBottom = boxB->y + boxB->h;
+  int boxBLeft   = boxB->x;
+  int boxBRight  = boxB->x + boxB->w;
 
-  if (box1Left >= box2Right)
+  if (boxALeft >= boxBRight)
   {
     return false;
   }
-  if (box1Right <= box2Left)
+  if (boxARight <= boxBLeft)
   {
     return false;
   }
-  if (box1Top >= box2Bottom)
+  if (boxATop >= boxBBottom)
   {
     return false;
   }
-  if (box1Bottom <= box2Top)
+  if (boxABottom <= boxBTop)
   {
     return false;
   }
 return true;
 }
 
-// collision c
+// collisions using box2box
 
 bool crash(SDL_Rect *player, SDL_Rect *block, int blockNum)
 {

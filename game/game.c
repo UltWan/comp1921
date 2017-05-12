@@ -1,6 +1,5 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <stdbool.h>
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_ttf.h>
 #include "game.h"
@@ -92,26 +91,26 @@ SDL_Texture* renderText(SDL_Renderer *ren, str message, str f_type, int f_size, 
   return texture;
 }
 
-// c
+// render TTF
 
-void renderTexture(SDL_Renderer *ren, SDL_Texture *tex, int x, int y, SDL_Rect *clip)
+void renderMess(SDL_Renderer *ren, SDL_Texture *tex, int x, int y, SDL_Rect *bit)
 {
-  SDL_Rect dest;
-  dest.x = x;
-  dest.y = y;
-  if (clip != 0)
+  SDL_Rect result;
+  result.x = x;
+  result.y = y;
+  if (bit != 0)
   {
-    dest.h = clip->h;
-    dest.w = clip->w;
+    result.h = bit->h;
+    result.w = bit->w;
   }
   else
   {
-    SDL_QueryTexture(tex, 0, 0, &dest.w, &dest.h);
+    SDL_QueryTexture(tex, 0, 0, &result.w, &result.h);
   }
-  SDL_RenderCopy(ren, tex, clip, &dest);
+  SDL_RenderCopy(ren, tex, bit, &result);
 }
 
-// cleanup when exiting c
+// destroys renderer and window
 
 void cleanup(char *type, ...)
 {
@@ -120,15 +119,11 @@ void cleanup(char *type, ...)
 
   while (*type != '\0')
   {
-    if (*type == 't')
-    {
-      SDL_DestroyTexture(va_arg(objects, SDL_Texture *));
-    }
-    else if (*type == 'r')
+    if (*type == 'g')
     {
       SDL_DestroyRenderer(va_arg(objects, SDL_Renderer *));
     }
-    else if (*type == 'w')
+    else if (*type == 'g')
     {
       SDL_DestroyWindow(va_arg(objects, SDL_Window *));
     }
