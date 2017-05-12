@@ -63,7 +63,8 @@ return true;
 
 bool crash(SDL_Rect *player, SDL_Rect *block, int blockNum)
 {
-  for (int i = 0; i < blockNum; i++)
+  int i;
+  for (i = 0; i < blockNum; i++)
   {
     if (box2box(block + i, player))
     {
@@ -79,7 +80,8 @@ SDL_Rect* addBlocks(int blockNum)
 {
   SDL_Rect *temp = (SDL_Rect*)malloc(blockNum * sizeof(SDL_Rect));
 
-  for (int i = 0; i < blockNum; i++)
+  int i;
+  for (i = 0; i < blockNum; i++)
   {
       temp[i].x = 60 + i*20;
       temp[i].y = rand() % 440;
@@ -95,7 +97,8 @@ SDL_Rect* addBlocks(int blockNum)
 
 void roadCrossing(SDL_Rect *block, int blockNum, int speed)
 {
-  for (int i = 0; i < blockNum; i++)
+  int i;
+  for (i = 0; i < blockNum; i++)
   {
     if (i % 2 == 0)
     {

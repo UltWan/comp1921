@@ -50,7 +50,9 @@ void renderColour(SDL_Renderer *ren, SDL_Rect *map, SDL_Rect *user, SDL_Rect *g,
   SDL_RenderFillRect(ren, user);
   SDL_SetRenderDrawColor(ren, 0, 0, 0xff, 0xff);
 
-  for (int i = 0; i < blockNum; i++)
+  int i;
+
+  for (i = 0; i < blockNum; i++)
   {
     SDL_RenderFillRect(ren, block + i);
   }
